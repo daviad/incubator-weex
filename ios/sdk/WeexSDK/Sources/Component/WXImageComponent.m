@@ -35,6 +35,7 @@
 #import <pthread/pthread.h>
 #import "WXMonitor.h"
 #import "WXSDKInstance_performance.h"
+#import "WXSDKInstance_private.h"
 
 @interface WXImageView : UIImageView
 
@@ -354,9 +355,13 @@ WX_EXPORT_METHOD(@selector(save:))
     
     if ([self isViewLoaded] && isChanged) {
         __weak typeof(self) weakSelf = self;
-        WXPerformBlockOnMainThread(^{
-            [weakSelf _clipsToBounds];
-        });
+        [self.weexInstance.componentManager _addUITask:^{
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            if (strongSelf == nil) {
+                return;
+            }
+            [strongSelf _clipsToBounds];
+        }];
     }
 }
 
